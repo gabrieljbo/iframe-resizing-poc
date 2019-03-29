@@ -1,0 +1,31 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>iframe Resizing POC</title>
+    <script type="text/javascript" src="js/porthole.min.js"></script>
+    <script type="text/javascript">
+        // Porthole proxy for PCS
+        var windowProxy1 = new Porthole.WindowProxy("", "PCS");
+        windowProxy1.addEventListener(onMessage);
+
+        // process message from PCS
+        function onMessage(message) {
+            if (message['data']) {
+                document.getElementById("PCS").style.height = message.data['param'][0]['height']
+
+                console.log("action from PCS message is: " + message.data['action'] + ", height -> " + message.data['param'][0]['height']);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Parent content</h1>
+    <br/>
+    <br/>
+    <div>
+        <iframe id="PCS" name="PCS" src="childPage.html" frameborder="1" scrolling="no" width="500px"></iframe>
+    </div>
+</body>
+
+</html>

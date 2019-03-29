@@ -1,0 +1,97 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Child content</title>
+    <script type="text/javascript" src="js/porthole.min.js"></script>
+    <script type="text/javascript">
+        // Porthole proxy for SVE
+        var windowProxy2 = new Porthole.WindowProxy("SVE");
+        windowProxy2.addEventListener(onMessage);
+
+        // process message from SVE
+        function onMessage(message) {
+            if (message['data']) {
+                alert("message from SVE is: " + message.data['action']);
+            }
+        }
+
+        // send message to SVE
+        function sendMessage(message) {
+            windowProxy2.post(message);
+        }
+
+        // generate interaction to increase iframe document size
+        function addMoreInternalContent() {
+            var paragraph = document.createElement("P");
+            var text = document.createTextNode("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur mattis, neque id tincidunt pharetra, ex dui posuere nisl, a euismod nisl ex at nibh. Aenean laoreet dui libero, et sollicitudin mi pretium ut. Cras dapibus mauris ut tellus sodales cursus. Suspendisse sed bibendum elit. Aenean erat tortor, bibendum nec auctor ut, porttitor sollicitudin leo. Vivamus lobortis a lacus quis venenatis. Cras lorem massa, facilisis in sapien ac, accumsan fermentum lacus.");
+            paragraph.appendChild(text);
+
+            document.getElementById("content").appendChild(paragraph);
+        }
+
+        // identify need to resize iframe
+        function resolveHeight() {
+            var currentHeight = getDocumentHeight();
+            if (!sessionStorage.getItem("documentHeight")) {
+                sessionStorage.setItem("documentHeight", -1);
+            }
+            var lastHeight = parseInt(sessionStorage.getItem("documentHeight"), 10);
+
+            if (currentHeight != lastHeight) {
+                sessionStorage.setItem("documentHeight", currentHeight);
+                sendMessage({ 'action': 'resizeIframe', 'param': [ {'height': currentHeight + 'px' } ] });
+
+                console.log("iframe document height is: " + currentHeight + "px");
+            }
+        }
+
+        // get current iframe document height
+        function getDocumentHeight() {
+            var height, scrollHeight, offsetHeight;
+
+            if (document.height) {
+                height = document.height;
+            } else if (document.body) {
+                if (document.body.scrollHeight) {
+                    height = scrollHeight = document.body.scrollHeight;
+                }
+
+                if (document.body.offsetHeight) {
+                    height = offsetHeight = document.body.offsetHeight;
+                }
+
+                if (scrollHeight && offsetHeight) {
+                    height = Math.max(scrollHeight, offsetHeight);
+                }
+            }
+
+            return height;
+        }
+
+        // check iframe document height permanently and thus not handle particular events for change it
+        window.onload = function (event) {
+            sessionStorage.removeItem("documentHeight");
+
+            window.setInterval(resolveHeight, 500);
+        }
+    </script>
+</head>
+
+<body>
+    <h2>iframe content</h2>
+    <br/>
+    <br/>
+    <button id="trigger" onclick="addMoreInternalContent()" style="font-size: 15px;"> CLICK ME !  to increase iframe content</button>
+    <br/>
+    <br/>
+    <div id="content">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur vitae eros sit amet nunc iaculis accumsan.
+        Proin ornare eros ut purus viverra volutpat auctor sed sem. Etiam placerat pulvinar turpis, at gravida risus
+        semper et. Sed ut turpis ac ligula commodo pellentesque in ut magna. Nam non porta augue. Mauris nunc erat,
+        pulvinar et euismod ut, pretium id eros. Integer pharetra libero ut quam eleifend, eget imperdiet elit congue.
+        Suspendisse blandit dui ut diam congue mattis. Donec viverra nulla eu ex efficitur fringilla. In eros felis,
+        vehicula interdum dictum et, cursus at nibh.
+    </div>
+</body>
+
+</html>
